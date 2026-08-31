@@ -1,0 +1,21 @@
+# mock DB — README STEP 1에서 생성 (배포용 사본은 deploy/ 아래에 별도로 둔다)
+/data/school.db
+
+# 파이썬
+__pycache__/
+*.pyc
+.venv/
+
+# 환경변수
+.env
+.env.local
+
+# AgentCore CLI 내부 상태 — 계정 ID·ARN이 들어있다
+deploy/agentcore/.cli/
+deploy/agentcore/.cache/
+deploy/agentcore/aws-targets.json
+deploy/agentcore/cdk/cdk.out/
+deploy/agentcore/cdk/node_modules/
+
+# OS
+.DS_Store
