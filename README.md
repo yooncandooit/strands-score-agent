@@ -1,17 +1,17 @@
-# Strands Agents로 내 서비스에 AI Agent 얹기 — 멀티 에이전트 패턴 3종 비교 실습
+# Strands Agents로 내 서비스에 AI Agent 구축하기: 멀티 에이전트 패턴 3종 비교 실습
 
 #### 목차
 
 - Step 0. [사전 준비](#step-0-사전-준비)
-  * [Bedrock 모델 액세스 요청하기](#bedrock-모델-액세스-요청하기)
-  * [IAM 사용자 및 액세스 키 생성하기](#iam-사용자-및-액세스-키-생성하기)
+  - [Bedrock 모델 액세스 요청하기](#bedrock-모델-액세스-요청하기)
+  - [IAM 사용자 및 액세스 키 생성하기](#iam-사용자-및-액세스-키-생성하기)
 - Step 1. [로컬 환경 구성하기](#step-1-로컬-환경-구성하기)
 - Step 2. [도구(@tool) 살펴보기](#step-2-도구tool-살펴보기)
 - Step 3. [단일 에이전트 실행해보기](#step-3-단일-에이전트-실행해보기)
 - Step 4. [멀티 에이전트 패턴 3종 비교하기](#step-4-멀티-에이전트-패턴-3종-비교하기)
-  * [Agents-as-Tools — 모델이 순서를 정합니다](#agents-as-tools--모델이-순서를-정합니다)
-  * [Graph — 개발자가 순서를 정합니다](#graph--개발자가-순서를-정합니다)
-  * [Swarm — 아무도 순서를 정하지 않습니다](#swarm--아무도-순서를-정하지-않습니다)
+  - [Agents-as-Tools : 모델이 순서를 정합니다](#agents-as-tools--모델이-순서를-정합니다)
+  - [Graph : 개발자가 순서를 정합니다](#graph--개발자가-순서를-정합니다)
+  - [Swarm : 아무도 순서를 정하지 않습니다](#swarm--아무도-순서를-정하지-않습니다)
 - Step 5. [AgentCore Runtime에 배포하기](#step-5-agentcore-runtime에-배포하기)
 - Step 6. [리소스 정리하기](#step-6-리소스-정리하기)
 
@@ -21,7 +21,7 @@
 
 이 저장소는 **이미 운영 중인 웹 서비스에 AI Agent를 얹으면 무엇이 달라지는가**를 실습으로 확인하는 코드입니다. 백엔드 코드는 한 줄도 바꾸지 않고, 기존 조회 함수 3개에 `@tool` 데코레이터만 붙였습니다. 그 결과 화면으로 만든 적 없는 질문에도 답할 수 있게 되었습니다.
 
-여기서 한 걸음 더 나아가, *"성적 정리하고, 리포트 만들고, 학부모 문자 초안까지"* 같은 복합 요청을 **여러 에이전트로 나누면 어떻게 되는지** 확인합니다. Strands Agents가 제공하는 멀티 에이전트 패턴 **Agents-as-Tools / Graph / Swarm**을 같은 질문·같은 도구로 각각 실행하고, 실행 시간·토큰·재현성을 실측 비교합니다.
+여기서 한 걸음 더 나아가, _"성적 정리하고, 리포트 만들고, 학부모 문자 초안까지"_ 같은 복합 요청을 **여러 에이전트로 나누면 어떻게 되는지** 확인합니다. Strands Agents가 제공하는 멀티 에이전트 패턴 **Agents-as-Tools / Graph / Swarm**을 같은 질문·같은 도구로 각각 실행하고, 실행 시간·토큰·재현성을 실측 비교합니다.
 
 > 본 실습은 AWS Student Builders Group(ASBG) 세션 발표를 위해 작성되었습니다.
 
@@ -29,7 +29,7 @@
 
 에이전트를 얹기 전과 후의 구조는 다음과 같습니다.
 
-**Before — 요구사항 1개 = view 1개**
+**Before : 요구사항 1개 = view 1개**
 
 ```
 선생님 ──①요청──> admin.html ──②화면이 조회 조건을 고정──> admin-api ──③──> Supabase
@@ -37,7 +37,7 @@
 새 요청이 오면 → 해석 → 새 화면 추가 → 배포 (리드타임 1~3일)
 ```
 
-**After — 어떤 도구를 어떤 조건으로 부를지 모델이 결정**
+**After : 어떤 도구를 어떤 조건으로 부를지 모델이 결정**
 
 ```
 선생님 ──①자연어 질문──> Strands Agent ──③도구 호출──> @tool 3개 ──> SQLite
@@ -46,7 +46,7 @@
                        Amazon Bedrock (Claude Sonnet 4.5)
 ```
 
-**멀티 에이전트 — Workflow (Graph로 구현)**
+**멀티 에이전트 : Workflow (Graph로 구현)**
 
 ```
                     ┌─ AgentCore Runtime ──────────────────────┐
@@ -74,13 +74,13 @@ AWS 콘솔에서 Amazon Bedrock 서비스로 이동합니다. 이때 **리전을
 
 양식을 아래와 같이 작성하고 제출합니다.
 
-| 항목 | 입력 예시 |
-|---|---|
-| 회사 이름 | 동국대학교 |
-| 회사 웹 사이트 URL | https://www.dongguk.edu/main |
-| 대상 사용자 | 내부 직원 |
-| 사용 목적 | 외부 사용자를 위한 콘텐츠, 코드 또는 분석 결과 생성 |
-| 사용 사례 설명 | AWS Student Builders Group 실습용 |
+| 항목               | 입력 예시                                           |
+| ------------------ | --------------------------------------------------- |
+| 회사 이름          | 동국대학교                                          |
+| 회사 웹 사이트 URL | https://www.dongguk.edu/main                        |
+| 대상 사용자        | 내부 직원                                           |
+| 사용 목적          | 외부 사용자를 위한 콘텐츠, 코드 또는 분석 결과 생성 |
+| 사용 사례 설명     | AWS Student Builders Group 실습용                   |
 
 > Important
 >
@@ -90,8 +90,8 @@ AWS 콘솔에서 Amazon Bedrock 서비스로 이동합니다. 이때 **리전을
 
 AWS 콘솔에서 IAM 서비스로 이동해 `사용자 생성`을 클릭합니다. 사용자 이름을 입력하고, 권한 옵션에서 `직접 정책 연결`을 선택한 뒤 아래 정책을 연결합니다.
 
-- `AmazonBedrockFullAccess` — 모델 호출용
-- `BedrockAgentCoreFullAccess` — AgentCore 배포 및 호출용 (Step 5를 진행하는 경우에만 필요)
+- `AmazonBedrockFullAccess` : 모델 호출용
+- `BedrockAgentCoreFullAccess` : AgentCore 배포 및 호출용 (Step 5를 진행하는 경우에만 필요)
 
 > Warning
 >
@@ -150,6 +150,7 @@ $ aws bedrock list-inference-profiles --region ap-northeast-2 \
 > - 폴백: `global.anthropic.claude-haiku-4-5-20251001-v1:0`
 >
 > 모델을 변경하려면 환경 변수로 덮어쓸 수 있습니다.
+>
 > ```
 > $ export BEDROCK_MODEL_ID=global.anthropic.claude-haiku-4-5-20251001-v1:0
 > ```
@@ -170,11 +171,11 @@ $ python data/seed.py
 
 `tools.py`에는 함수가 3개 있습니다. 그게 전부입니다.
 
-| 도구 | 역할 |
-|---|---|
-| `list_classes(grade, day)` | 반 목록 조회. 학년·요일로 필터링 |
-| `query_scores(class_ids, date_from, date_to, include_absent)` | 주차 시험 점수 조회 |
-| `aggregate(rows, group_by, metric)` | 반별·학년별·요일별 집계 |
+| 도구                                                          | 역할                             |
+| ------------------------------------------------------------- | -------------------------------- |
+| `list_classes(grade, day)`                                    | 반 목록 조회. 학년·요일로 필터링 |
+| `query_scores(class_ids, date_from, date_to, include_absent)` | 주차 시험 점수 조회              |
+| `aggregate(rows, group_by, metric)`                           | 반별·학년별·요일별 집계          |
 
 에이전트 없이 도구만 직접 호출해볼 수 있습니다. 이 단계는 **AWS 자격증명 없이도 실행 가능**합니다.
 
@@ -214,7 +215,7 @@ $ python demo.py
 
 터미널에 찍히는 툴 호출 로그를 확인하세요. 세 질문의 호출 체인이 서로 다릅니다.
 
-**질문 1 — 화면에 있던 질문**
+**질문 1 : 화면에 있던 질문**
 
 ```
 Q: 3반이랑 5반, 이번 달 단어 점수 평균 비교해줘
@@ -227,7 +228,7 @@ Q: 3반이랑 5반, 이번 달 단어 점수 평균 비교해줘
 26.2s · 툴 3회 · 토큰 in 30,193 / out 2,482
 ```
 
-**질문 2 — 화면에 없던 질문**
+**질문 2 : 화면에 없던 질문**
 
 ```
 Q: 중2 반들 중에 숙제율 제일 낮은 반이 어디야?
@@ -240,7 +241,7 @@ Q: 중2 반들 중에 숙제율 제일 낮은 반이 어디야?
 32.3s · 툴 3회 · 토큰 in 113,676 / out 6,011
 ```
 
-**질문 3 — 화면에 없던 질문**
+**질문 3 : 화면에 없던 질문**
 
 ```
 Q: 결석 많은 애들 빼고 3반 평균 다시 내줘
@@ -257,21 +258,21 @@ Q: 결석 많은 애들 빼고 3반 평균 다시 내줘
 
 ## Step 4. 멀티 에이전트 패턴 3종 비교하기
 
-*"3반 성적 정리하고, 분석해서 리포트 만들고, 학부모님께 보낼 문자 초안까지 만들어줘"*
+_"3반 성적 정리하고, 분석해서 리포트 만들고, 학부모님께 보낼 문자 초안까지 만들어줘"_
 
 이 요청은 조회 하나가 아니라 **조회 + 리포트 작성 + 문자 작성**, 세 가지 일입니다. 단일 에이전트로도 가능하지만 시스템 프롬프트에 조회 규칙·리포트 형식·문자 톤을 전부 넣어야 하고, 하나를 수정하면 나머지가 흔들립니다.
 
 그래서 아래와 같이 3개의 전문 에이전트로 분해했습니다.
 
-| 에이전트 | 역할 | 도구 |
-|---|---|---|
-| `score_query` | 조회와 집계 담당 | `list_classes`, `query_scores`, `aggregate` |
-| `report` | 조회 결과를 마크다운 리포트로 작성 | `save_report` |
-| `message` | 200자 이내 학부모 문자 초안 작성 | `save_message` |
+| 에이전트      | 역할                               | 도구                                        |
+| ------------- | ---------------------------------- | ------------------------------------------- |
+| `score_query` | 조회와 집계 담당                   | `list_classes`, `query_scores`, `aggregate` |
+| `report`      | 조회 결과를 마크다운 리포트로 작성 | `save_report`                               |
+| `message`     | 200자 이내 학부모 문자 초안 작성   | `save_message`                              |
 
 `multi.py`는 `--pattern` 플래그로 세 가지 패턴을 각각 실행합니다. `tools.py`와 `db.py`는 그대로 재사용하며, 패턴별로 **에이전트를 묶는 방식만** 다릅니다.
 
-### Agents-as-Tools — 모델이 순서를 정합니다
+### Agents-as-Tools : 모델이 순서를 정합니다
 
 전문 에이전트를 `@tool`로 감싸고, 오케스트레이터가 docstring을 읽어 필요한 것만 호출합니다.
 
@@ -315,7 +316,7 @@ orchestrator
 
 `report`와 `message` 에이전트는 **호출되지 않았습니다.** 코드는 그대로인데 오버헤드가 질문에 따라 줄어듭니다.
 
-### Graph — 개발자가 순서를 정합니다
+### Graph : 개발자가 순서를 정합니다
 
 `GraphBuilder`로 엣지를 직접 그립니다. `score_query`가 끝난 뒤 `report`와 `message`를 병렬로 실행하고, 둘 다 끝나면 `summary`로 합류시킵니다.
 
@@ -340,7 +341,7 @@ $ python multi.py --pattern graph
 
 리포트와 문자 초안은 서로의 결과를 필요로 하지 않기 때문에 병렬화가 가능했습니다.
 
-### Swarm — 아무도 순서를 정하지 않습니다
+### Swarm : 아무도 순서를 정하지 않습니다
 
 에이전트끼리 `handoff_to_agent`로 작업을 주고받으며 자율 협업합니다.
 
@@ -381,29 +382,29 @@ description을 채운 뒤에야 3개 에이전트가 정상적으로 동작했�
 
 동일한 질문, 동일한 도구로 실행한 실측값입니다.
 
-| 패턴 | 시간 | 에이전트 | 순서 결정 | 재현성 | 토큰(입/출) | 이 도메인에서 |
-|---|---|---|---|---|---|---|
-| Agents-as-Tools | 55.3초 | 3개 | 모델 | 3/3 | 42.5k / 4.9k | 적합 |
-| └ "평균만" 변형 | 17.2초 | 1개 | 모델 | 3/3 | 25.9k / 0.8k | 부분 호출 |
-| Graph 병렬 | 58.3초 | 4개 | 개발자 | 3/3 | 34.9k / 4.7k | 적합 |
-| Swarm | 65.7초 | 3개 (handoff 2회) | 에이전트 | 낮음 | 51.1k / 5.1k | 과잉 |
+| 패턴            | 시간   | 에이전트          | 순서 결정 | 재현성 | 토큰(입/출)  | 이 도메인에서 |
+| --------------- | ------ | ----------------- | --------- | ------ | ------------ | ------------- |
+| Agents-as-Tools | 55.3초 | 3개               | 모델      | 3/3    | 42.5k / 4.9k | 적합          |
+| └ "평균만" 변형 | 17.2초 | 1개               | 모델      | 3/3    | 25.9k / 0.8k | 부분 호출     |
+| Graph 병렬      | 58.3초 | 4개               | 개발자    | 3/3    | 34.9k / 4.7k | 적합          |
+| Swarm           | 65.7초 | 3개 (handoff 2회) | 에이전트  | 낮음   | 51.1k / 5.1k | 과잉          |
 
 **측정 환경**
 
-| 항목 | 값 |
-|---|---|
-| SDK | `strands-agents` 1.54.0 |
-| Python | 3.13.5 |
-| 모델 | `global.anthropic.claude-sonnet-4-5-20250929-v1:0` |
-| 리전 | `ap-northeast-2` |
-| 모델 파라미터 | `temperature=0`, `streaming=False` |
-| 데이터 | 로컬 SQLite mock, 시험일 범위 2026-06-15 ~ 2026-08-28 |
+| 항목          | 값                                                    |
+| ------------- | ----------------------------------------------------- |
+| SDK           | `strands-agents` 1.54.0                               |
+| Python        | 3.13.5                                                |
+| 모델          | `global.anthropic.claude-sonnet-4-5-20250929-v1:0`    |
+| 리전          | `ap-northeast-2`                                      |
+| 모델 파라미터 | `temperature=0`, `streaming=False`                    |
+| 데이터        | 로컬 SQLite mock, 시험일 범위 2026-06-15 ~ 2026-08-28 |
 
 **패턴 선택 기준**
 
-- **순서를 모르면** — 질문마다 필요한 것이 다르다면 Agents-as-Tools로 모델이 고르게 둡니다.
-- **순서를 알면** — 흐름이 정해져 있다면 Graph로 엣지를 그립니다. 독립적인 작업은 병렬로 묶어 시간을 줄일 수 있습니다.
-- **자율에 맡기려면** — 순서를 아무도 모를 때만 유효합니다. 이 도메인은 조회 → 정리 → 발송으로 순서가 이미 정해져 있어 Swarm의 이득이 없었습니다.
+- **순서를 모르면** : 질문마다 필요한 것이 다르다면 Agents-as-Tools로 모델이 고르게 둡니다.
+- **순서를 알면** : 흐름이 정해져 있다면 Graph로 엣지를 그립니다. 독립적인 작업은 병렬로 묶어 시간을 줄일 수 있습니다.
+- **자율에 맡기려면** : 순서를 아무도 모를 때만 유효합니다. 이 도메인은 조회 → 정리 → 발송으로 순서가 이미 정해져 있어 Swarm의 이득이 없었습니다.
 
 ## Step 5. AgentCore Runtime에 배포하기
 
@@ -490,7 +491,7 @@ strands-score-agent/
 ├── data/
 │   └── seed.py          mock 데이터 생성 (실제 스키마 기반, 가명 처리)
 ├── db.py                SQLite 조회 헬퍼
-├── tools.py             @tool 3개 — list_classes / query_scores / aggregate
+├── tools.py             @tool 3개 : list_classes / query_scores / aggregate
 ├── agent.py             단일 에이전트 정의 (모델 ID·리전 하드코딩)
 ├── demo.py              질문 3개 순차 실행
 ├── multi.py             멀티 에이전트 패턴 3종 (--pattern tools|graph|swarm)
@@ -501,7 +502,7 @@ strands-score-agent/
 
 ## References
 
-- [Strands Agents 소개 — AWS 한국 기술 블로그](https://aws.amazon.com/ko/blogs/tech/introducing-strands-agents-an-open-source-ai-agents-sdk/)
-- [AgentCore로 포스트잇 워크샵 자료 만들기 — AWS 한국 기술 블로그](https://aws.amazon.com/ko/blogs/tech/agentcore-agent-for-post-it-presentation/)
+- [Strands Agents 소개 : AWS 한국 기술 블로그](https://aws.amazon.com/ko/blogs/tech/introducing-strands-agents-an-open-source-ai-agents-sdk/)
+- [AgentCore로 포스트잇 워크샵 자료 만들기 : AWS 한국 기술 블로그](https://aws.amazon.com/ko/blogs/tech/agentcore-agent-for-post-it-presentation/)
 - [Strands Agents 공식 문서](https://strandsagents.com)
 - [strands-agents/samples](https://github.com/strands-agents/samples)
