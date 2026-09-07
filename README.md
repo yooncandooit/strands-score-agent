@@ -29,6 +29,9 @@
 
 여기서 한 걸음 더 나아가, _"성적 정리하고, 리포트 만들고, 학부모 문자 초안까지"_ 같은 복합 요청을 **여러 에이전트로 나누면 어떻게 되는지** 확인합니다. Strands Agents가 제공하는 멀티 에이전트 패턴 **Agents-as-Tools / Graph / Swarm**을 같은 질문·같은 도구로 각각 실행하고, 실행 시간·토큰·재현성을 실측 비교합니다.
 
+---
+
+
 ## Architecture & Demo
 
 에이전트를 얹기 전과 후의 구조는 다음과 같습니다.
@@ -41,7 +44,9 @@
 새 요청이 오면 → 해석 → 새 화면 추가 → 배포 (리드타임 1~3일)
 ```
 
-<img width="1015" height="429" alt="image" src="https://github.com/user-attachments/assets/1f09b81f-34a9-4688-9704-6b3547e376b1" />
+<img width="463" height="192" alt="image" src="https://github.com/user-attachments/assets/4cf4b169-abc6-4c41-8571-1b4aa7985437" />
+
+---
 
 
 **After : 어떤 도구를 어떤 조건으로 부를지 모델이 결정**
@@ -54,6 +59,9 @@
 ```
 
 <img width="424" height="173" alt="image" src="https://github.com/user-attachments/assets/099d5e38-1f9f-4124-87b7-448e38b59dec" />
+
+
+---
 
 
 **멀티 에이전트 : Workflow (Graph로 구현)**
@@ -74,9 +82,13 @@
 
 <img width="488" height="231" alt="image" src="https://github.com/user-attachments/assets/425c0a74-62ae-4d1e-aedb-b99fab35c348" />
 
+---
+
+
 ## Step 0. 사전 준비
 
 실습 시작 전 아래 두 가지를 **미리** 완료해야 합니다. 특히 모델 액세스 승인은 최대 15분이 소요되므로 실습 전날 완료하시는 것을 권장합니다.
+
 
 ### Bedrock 모델 액세스 요청하기
 
@@ -94,6 +106,8 @@ AWS 콘솔에서 Amazon Bedrock 서비스로 이동합니다. 이때 **리전을
 >
 > 제출 후 승인 메일 수신까지 **최대 약 15분**이 소요됩니다. 승인 전에는 모델 호출 시 `ResourceNotFoundException: Model use case details have not been submitted` 오류가 발생합니다.
 
+
+
 ### IAM 사용자 및 액세스 키 생성하기
 
 AWS 콘솔에서 IAM 서비스로 이동해 `사용자 생성`을 클릭합니다. 사용자 이름을 입력하고, 권한 옵션에서 `직접 정책 연결`을 선택한 뒤 아래 정책을 연결합니다.
@@ -110,6 +124,9 @@ AWS 콘솔에서 IAM 서비스로 이동해 `사용자 생성`을 클릭합니�
 > Warning
 >
 > 비밀 액세스 키는 **생성 직후 한 번만** 확인할 수 있습니다. 이 화면을 벗어나면 다시 조회할 수 없으니 안전한 곳에 복사해두세요.
+
+---
+
 
 ## Step 1. 로컬 환경 구성하기
 
@@ -178,6 +195,9 @@ $ python data/seed.py
 >
 > 출력에서 두 가지를 눈여겨보세요. 첫째, `전체평균`과 `출석만`의 값이 다릅니다. 결석 회차를 0점으로 계산하느냐 제외하느냐의 차이입니다. 둘째, `"3반"`의 id는 3이 아니라 **103**입니다. 실제 운영 DB가 그렇기 때문이며, 그래야 모델이 반 이름에서 id를 추측하지 않고 `list_classes`를 먼저 호출합니다.
 
+---
+
+
 ## Step 2. 도구(@tool) 살펴보기
 
 `tools.py`에는 함수가 3개 있습니다. 그게 전부입니다.
@@ -215,6 +235,9 @@ def query_scores(
 ```
 
 > 식당 메뉴판과 같습니다. 손님은 주방을 볼 수 없고, 메뉴 설명만 읽고 주문합니다. 모델도 함수 안을 볼 수 없고, **설명문만 읽고 호출**합니다. 그래서 docstring이 곧 API 명세입니다.
+
+---
+
 
 ## Step 3. 단일 에이전트 실행해보기
 
@@ -266,6 +289,9 @@ Q: 결석 많은 애들 빼고 3반 평균 다시 내줘
 ```
 
 세 질문을 실행하는 동안 `tools.py`와 `agent.py`는 **한 줄도 수정하지 않았습니다.** 질문 3은 화면으로 만든 적이 없는 조건이지만, docstring에 `include_absent` 설명이 있었기 때문에 자연어가 그대로 인자가 되었습니다.
+
+---
+
 
 ## Step 4. 멀티 에이전트 패턴 3종 비교하기
 
@@ -389,6 +415,9 @@ handoff 이력: score_query → report → message  (handoff 2회)
 
 description을 채운 뒤에야 3개 에이전트가 정상적으로 동작했습니다. 자율 협업은 공짜가 아니라, **서로를 설명해줘야 겨우 돌아갑니다.**
 
+---
+
+
 ### Benchmark Results
 
 동일한 질문, 동일한 도구로 실행한 실측값입니다.
@@ -416,6 +445,9 @@ description을 채운 뒤에야 3개 에이전트가 정상적으로 동작했�
 - **순서를 모르면** : 질문마다 필요한 것이 다르다면 Agents-as-Tools로 모델이 고르게 둡니다.
 - **순서를 알면** : 흐름이 정해져 있다면 Graph로 엣지를 그립니다. 독립적인 작업은 병렬로 묶어 시간을 줄일 수 있습니다.
 - **자율에 맡기려면** : 순서를 아무도 모를 때만 유효합니다. 이 도메인은 조회 → 정리 → 발송으로 순서가 이미 정해져 있어 Swarm의 이득이 없었습니다.
+
+---
+
 
 ## Step 5. AgentCore Runtime에 배포하기
 
@@ -458,6 +490,9 @@ $ agentcore invoke "중2 반들 중에 숙제율 제일 낮은 반이 어디야?
 > Warning
 >
 > AgentCore 배포에는 CloudFormation, ECR, IAM PassRole 권한이 추가로 필요합니다. `AmazonBedrockFullAccess`와 `BedrockAgentCoreFullAccess`만 가진 실습용 사용자로는 배포가 제한될 수 있습니다. 이 경우 관리자 권한을 가진 자격증명으로 진행하세요.
+
+---
+
 
 ## Step 6. 리소스 정리하기
 
@@ -510,6 +545,9 @@ strands-score-agent/
 │   └── main.py          AgentCore Runtime용 HTTP 엔트리포인트
 └── requirements.txt     strands-agents==1.54.0
 ```
+
+---
+
 
 ## References
 
