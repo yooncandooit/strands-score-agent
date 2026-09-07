@@ -1,5 +1,11 @@
 # Strands Agents로 내 서비스에 AI Agent 구축하기: 멀티 에이전트 패턴 3종 비교 실습
 
+> 본 실습은 AWS Student Builders Group(ASBG) 세션 발표를 위해 작성되었습니다.
+> 
+> 👉🏻 [발표 자료 보러가기](https://drive.google.com/file/d/1Hd4XHl1i8gWZexKLPttlD71NqKBzvta4/view?usp=sharing)
+
+---
+
 #### 목차
 
 - Step 0. [사전 준비](#step-0-사전-준비)
@@ -23,8 +29,6 @@
 
 여기서 한 걸음 더 나아가, _"성적 정리하고, 리포트 만들고, 학부모 문자 초안까지"_ 같은 복합 요청을 **여러 에이전트로 나누면 어떻게 되는지** 확인합니다. Strands Agents가 제공하는 멀티 에이전트 패턴 **Agents-as-Tools / Graph / Swarm**을 같은 질문·같은 도구로 각각 실행하고, 실행 시간·토큰·재현성을 실측 비교합니다.
 
-> 본 실습은 AWS Student Builders Group(ASBG) 세션 발표를 위해 작성되었습니다.
-
 ## Architecture & Demo
 
 에이전트를 얹기 전과 후의 구조는 다음과 같습니다.
@@ -37,6 +41,9 @@
 새 요청이 오면 → 해석 → 새 화면 추가 → 배포 (리드타임 1~3일)
 ```
 
+<img width="1015" height="429" alt="image" src="https://github.com/user-attachments/assets/1f09b81f-34a9-4688-9704-6b3547e376b1" />
+
+
 **After : 어떤 도구를 어떤 조건으로 부를지 모델이 결정**
 
 ```
@@ -45,6 +52,9 @@
                              ↕ 추론
                        Amazon Bedrock (Claude Sonnet 4.5)
 ```
+
+<img width="424" height="173" alt="image" src="https://github.com/user-attachments/assets/099d5e38-1f9f-4124-87b7-448e38b59dec" />
+
 
 **멀티 에이전트 : Workflow (Graph로 구현)**
 
@@ -62,6 +72,8 @@
                             ⑤리포트 + 문자 초안
 ```
 
+<img width="488" height="231" alt="image" src="https://github.com/user-attachments/assets/425c0a74-62ae-4d1e-aedb-b99fab35c348" />
+
 ## Step 0. 사전 준비
 
 실습 시작 전 아래 두 가지를 **미리** 완료해야 합니다. 특히 모델 액세스 승인은 최대 15분이 소요되므로 실습 전날 완료하시는 것을 권장합니다.
@@ -74,13 +86,9 @@ AWS 콘솔에서 Amazon Bedrock 서비스로 이동합니다. 이때 **리전을
 
 양식을 아래와 같이 작성하고 제출합니다.
 
-| 항목               | 입력 예시                                           |
-| ------------------ | --------------------------------------------------- |
-| 회사 이름          | 동국대학교                                          |
-| 회사 웹 사이트 URL | https://www.dongguk.edu/main                        |
-| 대상 사용자        | 내부 직원                                           |
-| 사용 목적          | 외부 사용자를 위한 콘텐츠, 코드 또는 분석 결과 생성 |
-| 사용 사례 설명     | AWS Student Builders Group 실습용                   |
+<img width="547" height="308" alt="image" src="https://github.com/user-attachments/assets/67a781d3-3a42-4b48-8199-4754cb89f696" />
+<img width="544" height="309" alt="image" src="https://github.com/user-attachments/assets/fae94c21-a856-406b-8a3e-7592152f8489" />
+
 
 > Important
 >
@@ -104,6 +112,9 @@ AWS 콘솔에서 IAM 서비스로 이동해 `사용자 생성`을 클릭합니�
 > 비밀 액세스 키는 **생성 직후 한 번만** 확인할 수 있습니다. 이 화면을 벗어나면 다시 조회할 수 없으니 안전한 곳에 복사해두세요.
 
 ## Step 1. 로컬 환경 구성하기
+
+<img width="542" height="259" alt="image" src="https://github.com/user-attachments/assets/92723587-e16e-424d-a6f3-8ac7ed438c07" />
+
 
 저장소를 클론하고 필요한 패키지를 설치합니다.
 
@@ -384,8 +395,8 @@ description을 채운 뒤에야 3개 에이전트가 정상적으로 동작했�
 
 | 패턴            | 시간   | 에이전트          | 순서 결정 | 재현성 | 토큰(입/출)  | 이 도메인에서 |
 | --------------- | ------ | ----------------- | --------- | ------ | ------------ | ------------- |
-| Agents-as-Tools | 55.3초 | 3개               | 모델      | 3/3    | 42.5k / 4.9k | 적합          |
-| └ "평균만" 변형 | 17.2초 | 1개               | 모델      | 3/3    | 25.9k / 0.8k | 부분 호출     |
+| Agents-as-Tools | 55.3초 | 3개               | 모델      | 3/3    | 42.5k / 4.9k | 보통          |
+| └ "평균만" 변형 | 17.2초 | 1개               | 모델      | 3/3    | 25.9k / 0.8k | -     |
 | Graph 병렬      | 58.3초 | 4개               | 개발자    | 3/3    | 34.9k / 4.7k | 적합          |
 | Swarm           | 65.7초 | 3개 (handoff 2회) | 에이전트  | 낮음   | 51.1k / 5.1k | 과잉          |
 
@@ -503,6 +514,5 @@ strands-score-agent/
 ## References
 
 - [Strands Agents 소개 : AWS 한국 기술 블로그](https://aws.amazon.com/ko/blogs/tech/introducing-strands-agents-an-open-source-ai-agents-sdk/)
-- [AgentCore로 포스트잇 워크샵 자료 만들기 : AWS 한국 기술 블로그](https://aws.amazon.com/ko/blogs/tech/agentcore-agent-for-post-it-presentation/)
 - [Strands Agents 공식 문서](https://strandsagents.com)
 - [strands-agents/samples](https://github.com/strands-agents/samples)
